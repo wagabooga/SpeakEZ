@@ -16,7 +16,17 @@ app.use(express.static(path.join(__dirname, 'public')))
 io.on('connection', socket => {
   console.log('New socket connection...')
 
+  // welcome message (single client)
   socket.emit('message', 'Welcome to SpeakEZ!')
+
+  // broadcast when a user connects (all clients !currentUser)
+  socket.broadcast.emit('message', 'A User has joined the chat');
+
+  // runs when client disconnects
+  socket.on('disconnect', () => {
+    io.emit('message', 'A user has left the chat')
+  })
+
 })
 
 const PORT = 3000 || process.env.PORT;

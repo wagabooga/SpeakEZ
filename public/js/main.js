@@ -1,4 +1,6 @@
 const chatForm = document.getElementById('chat-form')
+const chatMessages = document.querySelector('.chat-messages')
+
 const socket = io();
 
 
@@ -7,6 +9,11 @@ socket.on('message', message => {
   console.log(message)
   // this is where we would use react FE to "render" it
   outputMessage(message)
+
+  // after every message we want to scroll down
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+
 });
 
 
@@ -19,6 +26,9 @@ chatForm.addEventListener('submit', (e) => {
   // emit message to server
   socket.emit('chatMessage', msg)
   
+    // clear input after sending message
+    e.target.elements.msg.value = '';
+    e.target.elements.msg.focus()
 })
 
 // output message to DOM
@@ -26,6 +36,6 @@ chatForm.addEventListener('submit', (e) => {
 function outputMessage(message){
   const div = document.createElement('div')
   div.classList.add('message');
-  div.innerHTML = `<p class="meta">Brad <span>9:12pm</span></p> <p class="text"> ${message} </p>`
+  div.innerHTML = `<p class="meta">Matt <span>9:12pm</span></p> <p class="text"> ${message} </p>`
   document.querySelector('.chat-messages').appendChild(div)
 }

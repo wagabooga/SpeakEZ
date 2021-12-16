@@ -4,7 +4,12 @@ const http = require('http')
 const express = require('express');
 const socketio = require('socket.io')
 const formatMessage = require('./helpers/messages')
-const {userJoin, getCurrentUser} = require('./helpers/users')
+const {
+  userJoin,
+  getCurrentUser,
+  userLeavesChat,
+  getRoomUsers
+} = require('./helpers/users')
 
 const app = express();
 const server = http.createServer(app);
@@ -26,18 +31,31 @@ io.on('connection', socket => {
     socket.emit('message', formatMessage(botName, 'Welcome to SpeakEZ!' ))
   
     // broadcast when a user connects (all clients !currentUser)
-    socket.broadcast.to(user.room).emit('message', formatMessage(botName, `A ${username} has joined the chat` ));
+    socket.broadcast.to(user.room).emit('message', formatMessage(botName, `${username} has joined the chat` ));
 
+    // send users and room info
+    io.to(user.room).emit('roomUsers', {
+      room: user.room,
+      users: getRoomUsers(user.room)
+    })
   })
 
   // runs when client disconnects
   socket.on('disconnect', () => {
-    io.emit('message', formatMessage(botName, 'A user has left the chat' ))
+    const user = userLeavesChat(socket.id);
+    if(user) {
+      io.to(user.room).emit('message', formatMessage(botName, `${user.username} has left the chat` ))
+    }
+    io.to(user.room).emit('roomUsers', {
+      room: user.room,
+      users: getRoomUsers(user.room)
+    })
   })
 
   // listen for incoming chat messages
   socket.on('chatMessage', (msg) => {
-    io.emit('message', formatMessage('USER', msg))
+    const user = getCurrentUser(socket.id)
+    io.to(user.room).emit('message', formatMessage(user.username, msg))
   })
 })
 

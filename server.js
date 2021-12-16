@@ -28,7 +28,7 @@ io.on('connection', socket => {
 
     socket.join(user.room)
     // welcome message (single client)
-    socket.emit('message', formatMessage(botName, 'Welcome to SpeakEZ!' ))
+    socket.emit('message', formatMessage(botName, `Welcome ${username} to SpeakEZ!` ))
   
     // broadcast when a user connects (all clients !currentUser)
     socket.broadcast.to(user.room).emit('message', formatMessage(botName, `${username} has joined the chat` ));
@@ -46,10 +46,12 @@ io.on('connection', socket => {
     if(user) {
       io.to(user.room).emit('message', formatMessage(botName, `${user.username} has left the chat` ))
     }
+    // send users and room info
     io.to(user.room).emit('roomUsers', {
       room: user.room,
       users: getRoomUsers(user.room)
     })
+
   })
 
   // listen for incoming chat messages

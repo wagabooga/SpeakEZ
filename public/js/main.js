@@ -25,7 +25,6 @@ socket.on('message', message => {
   console.log(message)
   // this is where we would use react FE to "render" it
   outputMessage(message)
-
   // after every message we want to scroll down
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
@@ -59,7 +58,5 @@ function outputRoomName(room) {
 
 // add users to dom
 function outputUsers(users) {
-  userList.innerHTML = `
-    ${users.map(u => `<li>${user.username}</li>`).join()}
-  `
+  userList.innerHTML = `${users.map(user => `<li>${user.username}</li>`).join('')}`
 }

@@ -4,6 +4,7 @@ const http = require('http')
 const express = require('express');
 const socketio = require('socket.io')
 const formatMessage = require('./helpers/messages')
+const {userJoin, getCurrentUser} = require('./helpers/users')
 
 const app = express();
 const server = http.createServer(app);
@@ -17,13 +18,17 @@ formatMessage(botName, 'Welcome to SpeakEZ!' )
 
 // Run when client connects
 io.on('connection', socket => {
-  console.log('New socket connection...')
+  socket.on('joinRoom', ({username, room}) => {
+    const user = userJoin(socket.id, username, room)
 
-  // welcome message (single client)
-  socket.emit('message', formatMessage(botName, 'Welcome to SpeakEZ!' ))
+    socket.join(user.room)
+    // welcome message (single client)
+    socket.emit('message', formatMessage(botName, 'Welcome to SpeakEZ!' ))
+  
+    // broadcast when a user connects (all clients !currentUser)
+    socket.broadcast.to(user.room).emit('message', formatMessage(botName, `A ${username} has joined the chat` ));
 
-  // broadcast when a user connects (all clients !currentUser)
-  socket.broadcast.emit('message', formatMessage(botName, 'A User has joined the chat' ));
+  })
 
   // runs when client disconnects
   socket.on('disconnect', () => {

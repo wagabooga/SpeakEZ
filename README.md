@@ -1,2 +1,2 @@
 # SpeakEZ
-chat room web app, hopefully having emotes aswell
+chat room web app designed using Node, socket.io, express and basic html + css
